@@ -7,7 +7,7 @@ import type { UIMessage } from "ai";
 import { type FormEvent, useState } from "react";
 
 export default function Page() {
-  const { messages, sendMessage, addToolResult, status } = useChat();
+  const { messages, sendMessage, addToolResult, status, error } = useChat();
   const [input, setInput] = useState("");
 
   const handleSubmit = async (e: FormEvent) => {
@@ -45,6 +45,12 @@ export default function Page() {
           <Message key={m.id} message={m} addToolResult={addToolResult} />
         ))}
         {isWorking ? <p className="text-sm italic text-zinc-500">Agent is thinking…</p> : null}
+        {error ? (
+          <div className="rounded-md border border-red-300 bg-red-50 p-3 text-sm text-red-900 dark:border-red-900 dark:bg-red-950 dark:text-red-200">
+            <p className="font-medium">Agent error</p>
+            <p className="mt-1 font-mono text-xs">{error.message}</p>
+          </div>
+        ) : null}
       </section>
 
       <form
