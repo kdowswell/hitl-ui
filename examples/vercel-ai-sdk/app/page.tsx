@@ -3,7 +3,7 @@
 import { Assess } from "@/components/hitl-ui/assess";
 import { Decide } from "@/components/hitl-ui/decide";
 import { useChat } from "@ai-sdk/react";
-import type { UIMessage } from "ai";
+import { type UIMessage, lastAssistantMessageIsCompleteWithToolCalls } from "ai";
 import { type FormEvent, useEffect, useRef, useState } from "react";
 
 const SUGGESTIONS = [
@@ -26,7 +26,9 @@ const SUGGESTIONS = [
 ];
 
 export default function Page() {
-  const { messages, sendMessage, addToolResult, status, error, setMessages } = useChat();
+  const { messages, sendMessage, addToolResult, status, error, setMessages } = useChat({
+    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
+  });
   const [input, setInput] = useState("");
   const [provider, setProvider] = useState<string | null>(null);
   const tailRef = useRef<HTMLDivElement>(null);
