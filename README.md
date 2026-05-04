@@ -51,8 +51,9 @@ The catalog is organized by the **cognitive operation** the human is performing 
 This is a Turborepo monorepo:
 
 - `packages/cli` — the published `@kdowswell/hitl-ui` package (Commander-based CLI + `defineConfig` runtime).
-- `packages/components` — source of truth for component triads. Not published.
-- `examples/nextjs-tool-call` — Next.js 16 + React 19 + Tailwind v4 demo app.
+- `packages/components` — source of truth for component triads. Not published. Storybook playground at `pnpm storybook`.
+- `examples/nextjs-tool-call` — Next.js 16 + React 19 + Tailwind v4 demo with **static** mock tool-call payloads (no LLM required).
+- `examples/vercel-ai-sdk` — Same stack, **live agent loop** powered by Vercel AI SDK v6. Default provider is local Ollama (zero API cost); falls back to OpenAI if `OPENAI_API_KEY` is set. See its README for setup.
 
 See [`hitl-ui-spec.md`](./hitl-ui-spec.md) for the authoritative architecture spec, including per-component schemas, rendering models, and the positioning vs A2UI / Adaptive Cards / CopilotKit. The original draft (5 components, "agent-ui" name) lives at [`agent-ui-spec.md`](./agent-ui-spec.md) for historical context. See [`CLAUDE.md`](./CLAUDE.md) for contributor guidance.
 
