@@ -1,5 +1,5 @@
 /**
- * Public runtime export for `@kdowswell/hitl-ui`. Imported by users from their
+ * Public runtime export for `hitl-ui`. Imported by users from their
  * `hitl-ui.config.ts` for type-safe configuration. Zero runtime cost —
  * `defineConfig` is a typed identity function.
  */

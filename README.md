@@ -18,9 +18,9 @@ The instructions are the differentiator. Form components are easy to find. Opini
 
 ```bash
 # In your existing Next.js / React app
-npx @kdowswell/hitl-ui@latest init
-npx @kdowswell/hitl-ui@latest add assess
-npx @kdowswell/hitl-ui@latest add decide
+npx hitl-ui@latest init
+npx hitl-ui@latest add assess
+npx hitl-ui@latest add decide
 ```
 
 This drops each triad into your project:
@@ -50,7 +50,7 @@ A multi-question structured form. 1–8 questions, ten heterogeneous field types
 ![assess component — every supported field type rendered in a single form](./docs/screenshots/component-assess.png)
 
 ```bash
-npx @kdowswell/hitl-ui@latest add assess
+npx hitl-ui@latest add assess
 ```
 
 [Schema & full instructions ↗](./packages/components/assess/) · [Storybook variants ↗](./packages/components/assess/assess.stories.tsx)
@@ -64,7 +64,7 @@ A decision UI in two modes. **`select`** mode renders option cards for a simple 
 ![decide component in score mode — agent-pre-scored matrix of databases × criteria with weighted-total winner, executive findings, per-cell rationale, citation links, and override stepper](./docs/screenshots/component-decide.png)
 
 ```bash
-npx @kdowswell/hitl-ui@latest add decide
+npx hitl-ui@latest add decide
 ```
 
 [Schema & full instructions ↗](./packages/components/decide/) · [Storybook variants ↗](./packages/components/decide/decide.stories.tsx)
@@ -85,7 +85,7 @@ See [`hitl-ui-spec.md`](./hitl-ui-spec.md) for full schemas and the cognitive-op
 
 This is a Turborepo monorepo:
 
-- `packages/cli` — the published `@kdowswell/hitl-ui` package (Commander-based CLI + `defineConfig` runtime).
+- `packages/cli` — the published `hitl-ui` package (Commander-based CLI + `defineConfig` runtime).
 - `packages/components` — source of truth for component triads. Not published. Component playground at `pnpm storybook` (http://localhost:6006).
 - `examples/nextjs-tool-call` — Next.js 16 + React 19 + Tailwind v4 demo with **static** mock tool-call payloads (no LLM required).
 - `examples/vercel-ai-sdk` — Same stack, **live agent loop** powered by Vercel AI SDK v6. Default provider is the **Vercel AI Gateway** (one key, any model — Claude 4.5/4.6/4.7, GPT-5, Gemini 2.5, etc.); auto-falls back to OpenAI direct or local Ollama. See its [README](./examples/vercel-ai-sdk/README.md) for setup.

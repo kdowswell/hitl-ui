@@ -8,7 +8,7 @@ hitl-ui is a shadcn-style component library for human-in-the-loop UI in AI agent
 
 The catalog is organized by **cognitive operation** (provide info / decide / order / gate / annotate / disambiguate / calibrate), not by UI element type — see `hitl-ui-spec.md` for the rationale and per-component schemas.
 
-The project was originally named "agent-ui" before the scope was narrowed and the bare/scoped npm names were unavailable. The repo directory and `agent-ui-spec.md` retain that name for historical context, but every shipped artifact uses `hitl-ui` / `@kdowswell/hitl-ui`. The authoritative spec is `hitl-ui-spec.md`.
+The project was originally named "agent-ui" before the scope was narrowed; the bare `agent-ui` npm name was already taken. The repo directory and `agent-ui-spec.md` retain the original name for historical context. Every shipped artifact uses `hitl-ui` — both the bare npm package name and the CLI binary. The authoritative spec is `hitl-ui-spec.md`.
 
 ## Key Principles
 
@@ -40,7 +40,7 @@ Fix: set `data-hitl-component="<name>"` on every portaled element so the same `<
 - React 19, TypeScript strict, Tailwind v4, Radix UI primitives.
 - Commander for CLI, `@clack/prompts` for interactive UX, `jiti` for loading user TS configs.
 - Vitest for tests. Biome for lint/format.
-- Changesets for versioning. Only `@kdowswell/hitl-ui` is published in v0.
+- Changesets for versioning. Only `hitl-ui` is published.
 
 ## Distribution Model
 
@@ -96,4 +96,4 @@ Components target React 19 in their peer-dep declarations. Don't introduce React
 
 ## Published Package Identity
 
-`@kdowswell/hitl-ui` — published under Kurt's personal npm scope (`@kdowswell`). The bare `agent-ui` package, the `agent-ui` org, and `hitl-ui` org names were all unavailable on npm at v0 publish time, so v0 ships under the personal scope. The package is dual-purpose: it provides the `hitl-ui` binary (`bin`) and a tiny runtime export (`exports`) so users can write `import type { HitlUiConfig } from '@kdowswell/hitl-ui'` in their `hitl-ui.config.ts`. Consumers invoke it as `npx @kdowswell/hitl-ui@latest …`. Migration to a dedicated org scope is a future option (republish + deprecate pointer).
+`hitl-ui` — published as the bare unscoped npm package. The bare `agent-ui` name was taken (which is why the project rebranded), but `hitl-ui` was available. The package is dual-purpose: it provides the `hitl-ui` binary (`bin`) and a tiny runtime export (`exports`) so users can write `import type { HitlUiConfig } from 'hitl-ui'` in their `hitl-ui.config.ts`. Consumers invoke it as `npx hitl-ui@latest …`. The `@hitl-ui` npm org is reserved for future sibling packages (`@hitl-ui/registry`, `@hitl-ui/devtools`, etc.) if the project ever splits.

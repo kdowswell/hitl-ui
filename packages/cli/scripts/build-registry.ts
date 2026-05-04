@@ -5,7 +5,7 @@
  *
  * Also copies src/templates/* to dist/templates/ so `init` can find them.
  *
- * Run by `pnpm --filter @kdowswell/hitl-ui build` after tsup completes.
+ * Run by `pnpm --filter hitl-ui build` after tsup completes.
  */
 import { existsSync } from "node:fs";
 import { copyFile, mkdir, readFile, readdir, writeFile } from "node:fs/promises";

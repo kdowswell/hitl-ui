@@ -1,5 +1,5 @@
 {
-  "name": "@kdowswell/hitl-ui-components",
+  "name": "hitl-ui-components",
   "version": "0.0.0",
   "private": true,
   "description": "Source-of-truth component triads for hitl-ui. Not published.",

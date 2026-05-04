@@ -7,5 +7,5 @@
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": ["@kdowswell/hitl-ui-components", "examples-nextjs-tool-call"]
+  "ignore": ["hitl-ui-components", "examples-nextjs-tool-call", "examples-vercel-ai-sdk"]
 }

@@ -63,9 +63,9 @@ This means: **zero setup required**. Host apps with shadcn-style tokens (`--card
 The CLI copies source files into the developer's project. They own the code after install.
 
 ```bash
-npx @kdowswell/hitl-ui@latest init       # scaffolds hitl-ui.config.ts
-npx @kdowswell/hitl-ui@latest add assess # adds the assess triad
-npx @kdowswell/hitl-ui@latest list       # shows available components
+npx hitl-ui@latest init       # scaffolds hitl-ui.config.ts
+npx hitl-ui@latest add assess # adds the assess triad
+npx hitl-ui@latest list       # shows available components
 ```
 
 After `add assess`, the developer gets:
@@ -87,7 +87,7 @@ instructions/hitl-ui/assess.instructions.md # Agent usage guide
 `hitl-ui.config.ts` (created by `init`):
 
 ```typescript
-import type { HitlUiConfig } from "@kdowswell/hitl-ui";
+import type { HitlUiConfig } from "hitl-ui";
 
 const config: HitlUiConfig = {
   componentsDir: "components/hitl-ui",
@@ -407,7 +407,7 @@ agent-ui/                          # repo dir kept for git-history continuity
 ├── agent-ui-spec.md               # original 5-component draft (historical)
 │
 ├── packages/
-│   ├── cli/                       # Published as @kdowswell/hitl-ui
+│   ├── cli/                       # Published as hitl-ui
 │   │   ├── src/
 │   │   │   ├── index.ts           # commander wiring
 │   │   │   ├── runtime.ts         # exports defineConfig
@@ -417,7 +417,7 @@ agent-ui/                          # repo dir kept for git-history continuity
 │   │   ├── scripts/build-registry.ts
 │   │   └── tests/
 │   │
-│   └── components/                # @kdowswell/hitl-ui-components (private)
+│   └── components/                # hitl-ui-components (private)
 │       ├── assess/                # Shipped
 │       ├── decide/                # Planned
 │       ├── rank/                  # Planned

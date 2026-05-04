@@ -1,4 +1,4 @@
-# @kdowswell/hitl-ui
+# hitl-ui
 
 > Human-in-the-loop UI components for AI agents.
 
@@ -8,8 +8,8 @@ shadcn-style installer. Each component ships as a **triad** — a React componen
 
 ```bash
 # In your existing Next.js / React app
-npx @kdowswell/hitl-ui@latest init
-npx @kdowswell/hitl-ui@latest add assess
+npx hitl-ui@latest init
+npx hitl-ui@latest add assess
 ```
 
 This drops the `assess` triad into your project:

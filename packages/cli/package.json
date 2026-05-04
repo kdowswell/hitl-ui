@@ -1,5 +1,5 @@
 {
-  "name": "@kdowswell/hitl-ui",
+  "name": "hitl-ui",
   "version": "0.1.0",
   "description": "Human-in-the-loop UI components for AI agents — shadcn-style installable triads of React component + tool definition + agent instructions.",
   "keywords": [
@@ -44,7 +44,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@kdowswell/hitl-ui-components": "workspace:*",
+    "hitl-ui-components": "workspace:*",
     "@types/node": "^22.10.2",
     "execa": "^9.5.2",
     "tsup": "^8.3.5",

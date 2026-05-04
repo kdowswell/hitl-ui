@@ -25,7 +25,7 @@ describe("hitl-ui init", () => {
     expect(content).toContain('toolsDir: "tools/hitl-ui"');
     expect(content).toContain('instructionsDir: "instructions/hitl-ui"');
     expect(content).toContain('renderMode: "tool-call"');
-    expect(content).toContain('import type { HitlUiConfig } from "@kdowswell/hitl-ui"');
+    expect(content).toContain('import type { HitlUiConfig } from "hitl-ui"');
   });
 
   it("refuses to overwrite existing config without --force", async () => {

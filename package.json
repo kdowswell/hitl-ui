@@ -14,7 +14,7 @@
     "lint": "biome check .",
     "format": "biome format --write .",
     "typecheck": "turbo run typecheck",
-    "storybook": "pnpm -F @kdowswell/hitl-ui-components storybook",
+    "storybook": "pnpm -F hitl-ui-components storybook",
     "build-storybook": "turbo run build-storybook",
     "clean": "turbo run clean && rm -rf node_modules .turbo",
     "changeset": "changeset",

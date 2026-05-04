@@ -1,4 +1,4 @@
-import { defineConfig } from "@kdowswell/hitl-ui";
+import { defineConfig } from "hitl-ui";
 
 export default defineConfig({
   componentsDir: "components/hitl-ui",
