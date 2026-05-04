@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: light dark;
+
+  /*
+   * Demo of the hitl-ui token cascade: declaring --primary here causes every
+   * component using `bg-(--hitl-primary)` to inherit this orange instead of
+   * the literal default. Remove this block to see the components revert to
+   * their built-in fallback theme. Add the rest of the shadcn token set
+   * (--card, --foreground, --border, --ring, --radius, etc.) to fully theme.
+   */
+  --primary: oklch(0.7 0.17 45);
+  --primary-foreground: oklch(0.99 0 0);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background-color: #fafaf9;
+  color: #18181b;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #09090b;
+    color: #fafafa;
+  }
+}

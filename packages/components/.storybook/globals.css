@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+/*
+ * Tailwind v4 respects .gitignore for content auto-detection. The component
+ * sources are checked in (not gitignored), so auto-detect picks them up
+ * from the package root. Explicit @source kept for clarity in case the
+ * repo's gitignore policy changes later.
+ */
+@source "../**/*.{ts,tsx}";
+
+/* ----------------------------------------------------------------------------
+ * Theme demos for the Storybook theme toolbar.
+ *
+ * The hitl-ui components use a CSS-variable cascade (see the inline <style>
+ * block at the top of each component). They look for shadcn-convention tokens
+ * (`--card`, `--foreground`, `--primary`, `--border`, `--ring`, `--radius`)
+ * and fall back to literal defaults if those aren't declared.
+ *
+ * Each class below re-declares a different combination so a single story can
+ * render under multiple themes via the Storybook toolbar.
+ * -------------------------------------------------------------------------- */
+
+html {
+  background: var(--background, oklch(0.99 0 0));
+  color: var(--foreground, oklch(0.18 0.005 285));
+  min-height: 100vh;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+html.shadcn-light {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.18 0.005 285);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.18 0.005 285);
+  --primary: oklch(0.21 0.006 285);
+  --primary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.97 0.003 285);
+  --muted-foreground: oklch(0.55 0.01 285);
+  --border: oklch(0.92 0.004 285);
+  --input: oklch(0.85 0.004 285);
+  --ring: oklch(0.55 0.05 250);
+  --radius: 0.75rem;
+}
+
+html.shadcn-dark {
+  --background: oklch(0.14 0.005 285);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.18 0.005 285);
+  --card-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.985 0 0);
+  --primary-foreground: oklch(0.21 0.006 285);
+  --muted: oklch(0.27 0.005 285);
+  --muted-foreground: oklch(0.65 0.008 285);
+  --border: oklch(0.27 0.005 285);
+  --input: oklch(0.32 0.005 285);
+  --ring: oklch(0.65 0.04 250);
+  --radius: 0.75rem;
+}
+
+html.brand-orange {
+  --primary: oklch(0.7 0.17 45);
+  --primary-foreground: oklch(0.99 0 0);
+  --ring: oklch(0.7 0.17 45);
+}
+
+html.brand-teal {
+  --primary: oklch(0.62 0.12 195);
+  --primary-foreground: oklch(0.99 0 0);
+  --ring: oklch(0.62 0.12 195);
+}

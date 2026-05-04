@@ -1,0 +1,35 @@
+{
+  "name": "examples-nextjs-tool-call",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Demo: hitl-ui assess triad rendered in a Next.js 16 + React 19 + Tailwind v4 app via a mock tool-call dispatcher.",
+  "type": "module",
+  "scripts": {
+    "predev": "node ../../packages/cli/dist/index.js add assess --force",
+    "dev": "next dev",
+    "prebuild": "node ../../packages/cli/dist/index.js add assess --force",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf .next node_modules components/hitl-ui tools/hitl-ui instructions/hitl-ui"
+  },
+  "dependencies": {
+    "@radix-ui/react-checkbox": "^1.1.3",
+    "@radix-ui/react-select": "^2.1.4",
+    "@radix-ui/react-switch": "^1.1.2",
+    "clsx": "^2.1.1",
+    "next": "^16.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@kdowswell/hitl-ui": "workspace:*",
+    "@tailwindcss/postcss": "^4.0.0",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.6.3"
+  }
+}

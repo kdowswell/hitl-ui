@@ -1,0 +1,60 @@
+{
+  "name": "assess",
+  "description": "Present a structured assessment to the user with multiple questions of varying types. Use when you need answers to 1-8 related questions before proceeding. Cognitive op: provide info.",
+  "parameters": {
+    "type": "object",
+    "required": ["title", "questions"],
+    "properties": {
+      "title": {
+        "type": "string",
+        "description": "Short title for the assessment"
+      },
+      "description": {
+        "type": "string",
+        "description": "Context for why these questions matter right now"
+      },
+      "questions": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 8,
+        "items": {
+          "type": "object",
+          "required": ["id", "type", "prompt"],
+          "properties": {
+            "id": { "type": "string" },
+            "type": {
+              "enum": [
+                "text",
+                "textarea",
+                "select",
+                "multi_select",
+                "scale",
+                "boolean",
+                "number",
+                "email",
+                "url",
+                "date"
+              ]
+            },
+            "prompt": { "type": "string" },
+            "options": { "type": "array", "items": { "type": "string" } },
+            "scale_min_label": { "type": "string" },
+            "scale_max_label": { "type": "string" },
+            "scale_steps": { "type": "number", "default": 5 },
+            "required": { "type": "boolean", "default": true },
+            "placeholder": { "type": "string" },
+            "validation": {
+              "type": "object",
+              "properties": {
+                "min": { "type": "number" },
+                "max": { "type": "number" },
+                "pattern": { "type": "string" },
+                "message": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
