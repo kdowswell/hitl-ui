@@ -59,9 +59,9 @@ npx @kdowswell/hitl-ui@latest add assess
 
 #### `decide` — pick + weigh options
 
-A decision UI in two modes. **`select`** mode renders option cards for a simple pick. **`score`** mode renders a matrix grid where the human scores each option against weighted criteria; the highest weighted total is highlighted as the suggested winner in real time. 2–5 options, up to 6 criteria. Use it when the human needs to weigh tradeoffs.
+A decision UI in two modes. **`select`** mode renders option cards for a simple pick. **`score`** mode flips the workload: the **agent** does the comparative analysis up front and pre-fills every cell with a value, rationale, and citations; the human's job is to *verify* the matrix, follow sources, and override anything they disagree with. The result payload tags each cell as `agent` or `human` so the agent can see exactly what was changed. 2–5 options, up to 6 criteria.
 
-![decide component in score mode — matrix of databases × criteria with weighted-total winner highlighting](./docs/screenshots/component-decide.png)
+![decide component in score mode — agent-pre-scored matrix of databases × criteria with weighted-total winner, executive findings, per-cell rationale, citation links, and override stepper](./docs/screenshots/component-decide.png)
 
 ```bash
 npx @kdowswell/hitl-ui@latest add decide

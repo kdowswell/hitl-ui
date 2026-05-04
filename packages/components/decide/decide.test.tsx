@@ -1,8 +1,42 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { Decide } from "./decide";
 import { decideParamsSchema } from "./decide.types";
+
+/* ---------------------------------------------------------------------------
+ * Helpers
+ * ------------------------------------------------------------------------- */
+
+const cell = (value: number, rationale = "because reasons") => ({ value, rationale });
+
+const validScoreOptions = [
+  {
+    id: "a",
+    label: "A",
+    scores: {
+      cost: cell(5),
+      speed: cell(1),
+    },
+  },
+  {
+    id: "b",
+    label: "B",
+    scores: {
+      cost: cell(2),
+      speed: cell(5),
+    },
+  },
+];
+
+const validScoreCriteria = [
+  { id: "cost", label: "Cost", weight: 2 },
+  { id: "speed", label: "Speed", weight: 1 },
+];
+
+/* ---------------------------------------------------------------------------
+ * Schema
+ * ------------------------------------------------------------------------- */
 
 describe("decide Zod schema", () => {
   it("accepts a valid select-mode payload", () => {
@@ -45,7 +79,7 @@ describe("decide Zod schema", () => {
     expect(result.success).toBe(false);
   });
 
-  it("accepts score mode with criteria", () => {
+  it("rejects score mode without per-cell pre-fills", () => {
     const result = decideParamsSchema.safeParse({
       title: "T",
       mode: "score",
@@ -55,9 +89,37 @@ describe("decide Zod schema", () => {
       ],
       criteria: [{ id: "c1", label: "Cost" }],
     });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects pre-scores outside [1, scale_steps]", () => {
+    const result = decideParamsSchema.safeParse({
+      title: "T",
+      mode: "score",
+      scale_steps: 5,
+      options: [
+        { id: "a", label: "A", scores: { c1: cell(99) } },
+        { id: "b", label: "B", scores: { c1: cell(2) } },
+      ],
+      criteria: [{ id: "c1", label: "Cost" }],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts a fully pre-scored payload", () => {
+    const result = decideParamsSchema.safeParse({
+      title: "T",
+      mode: "score",
+      options: validScoreOptions,
+      criteria: validScoreCriteria,
+    });
     expect(result.success).toBe(true);
   });
 });
+
+/* ---------------------------------------------------------------------------
+ * Select mode component
+ * ------------------------------------------------------------------------- */
 
 describe("Decide component — select mode", () => {
   const baseProps = {
@@ -119,73 +181,113 @@ describe("Decide component — select mode", () => {
         ]}
       />,
     );
-    // Each option card should list both criteria.
     const aCard = screen.getByRole("radio", { name: /A/ });
     expect(within(aCard).getByText(/Cost/)).toBeInTheDocument();
     expect(within(aCard).getByText(/Speed/)).toBeInTheDocument();
   });
 });
 
+/* ---------------------------------------------------------------------------
+ * Score mode component
+ * ------------------------------------------------------------------------- */
+
 describe("Decide component — score mode", () => {
   const baseProps = {
     title: "Score them",
     mode: "score" as const,
     onSubmit: vi.fn(),
-    options: [
-      { id: "a", label: "A" },
-      { id: "b", label: "B" },
-    ],
-    criteria: [
-      { id: "cost", label: "Cost", weight: 2 },
-      { id: "speed", label: "Speed", weight: 1 },
-    ],
+    options: validScoreOptions,
+    criteria: validScoreCriteria,
     scale_steps: 5,
   };
 
-  it("renders a matrix with one input per (option × criterion) cell", () => {
+  it("renders the agent's pre-fill in every cell", () => {
     render(<Decide {...baseProps} />);
-    // 2 options × 2 criteria = 4 score inputs
-    expect(screen.getAllByRole("spinbutton")).toHaveLength(4);
+    // 2 options × 2 criteria = 4 cells, each rendered as a button labeled "{x}/{max}"
+    const aRow = screen.getByRole("row", { name: /A/ });
+    expect(within(aRow).getByRole("button", { name: /A on Cost: 5 of 5/ })).toBeInTheDocument();
+    expect(within(aRow).getByRole("button", { name: /A on Speed: 1 of 5/ })).toBeInTheDocument();
   });
 
-  it("disables submit until every cell is scored", async () => {
-    const onSubmit = vi.fn();
-    render(<Decide {...baseProps} onSubmit={onSubmit} />);
-    const submit = screen.getByRole("button", { name: "Submit" });
-    expect(submit).toBeDisabled();
-
-    const inputs = screen.getAllByRole("spinbutton");
-    for (const input of inputs) {
-      fireEvent.change(input, { target: { value: "3" } });
-    }
-    expect(submit).toBeEnabled();
+  it("computes weighted totals from the pre-fill and highlights the winner", () => {
+    render(<Decide {...baseProps} />);
+    // A: 5×2 + 1×1 = 11, B: 2×2 + 5×1 = 9 → A wins
+    const aRow = screen.getByRole("row", { name: /A/ });
+    expect(within(aRow).getByText("11")).toBeInTheDocument();
+    expect(within(aRow).getByLabelText("suggested winner")).toBeInTheDocument();
   });
 
-  it("computes winner via weighted total and submits the full matrix", () => {
+  it("renders the agent's findings when provided", () => {
+    render(<Decide {...baseProps} findings="A wins on cost. B wins on speed." />);
+    expect(screen.getByText(/A wins on cost\. B wins on speed\./)).toBeInTheDocument();
+  });
+
+  it("submits the matrix tagged with sources and modified=false on first submit", async () => {
     const onSubmit = vi.fn();
+    const user = userEvent.setup();
     render(<Decide {...baseProps} onSubmit={onSubmit} />);
 
-    // A: cost=5×2 + speed=1×1 = 11
-    // B: cost=2×2 + speed=5×1 = 9
-    // Winner: A
-    const cells = screen.getAllByRole("spinbutton");
-    fireEvent.change(cells[0]!, { target: { value: "5" } }); // A cost
-    fireEvent.change(cells[1]!, { target: { value: "1" } }); // A speed
-    fireEvent.change(cells[2]!, { target: { value: "2" } }); // B cost
-    fireEvent.change(cells[3]!, { target: { value: "5" } }); // B speed
-
-    fireEvent.click(screen.getByRole("button", { name: "Submit" }));
+    await user.click(screen.getByRole("button", { name: "Confirm scoring" }));
     expect(onSubmit).toHaveBeenCalledWith({
-      scores: { a: { cost: 5, speed: 1 }, b: { cost: 2, speed: 5 } },
       winner: "a",
+      modified: false,
+      scores: {
+        a: { cost: { value: 5, source: "agent" }, speed: { value: 1, source: "agent" } },
+        b: { cost: { value: 2, source: "agent" }, speed: { value: 5, source: "agent" } },
+      },
     });
   });
 
-  it("clamps cell values to the [1, scale_steps] range", () => {
+  it("lets the human override a cell and reflects it in submit + winner", async () => {
     const onSubmit = vi.fn();
+    const user = userEvent.setup();
     render(<Decide {...baseProps} onSubmit={onSubmit} />);
-    const cell = screen.getAllByRole("spinbutton")[0]!;
-    fireEvent.change(cell, { target: { value: "99" } });
-    expect((cell as HTMLInputElement).value).toBe("5");
+
+    // Open the A · Cost cell, then click "1" to drop A's cost score.
+    await user.click(screen.getByRole("button", { name: /A on Cost: 5 of 5/ }));
+    const stepper = screen.getByRole("radiogroup", { name: "Override score" });
+    await user.click(within(stepper).getByRole("radio", { name: "1" }));
+
+    // Now A: 1×2 + 1×1 = 3, B: 2×2 + 5×1 = 9 → B wins
+    await user.click(screen.getByRole("button", { name: "Confirm with overrides" }));
+    expect(onSubmit).toHaveBeenCalledWith({
+      winner: "b",
+      modified: true,
+      scores: {
+        a: { cost: { value: 1, source: "human" }, speed: { value: 1, source: "agent" } },
+        b: { cost: { value: 2, source: "agent" }, speed: { value: 5, source: "agent" } },
+      },
+    });
+  });
+
+  it("surfaces rationale + citation when a cell is selected", async () => {
+    const user = userEvent.setup();
+    render(
+      <Decide
+        {...baseProps}
+        options={[
+          {
+            id: "a",
+            label: "A",
+            scores: {
+              cost: {
+                value: 4,
+                rationale: "Benchmark says A is cheap at scale.",
+                sources: [{ title: "A docs", url: "https://example.com/a" }],
+              },
+              speed: cell(3),
+            },
+          },
+          { id: "b", label: "B", scores: { cost: cell(2), speed: cell(5) } },
+        ]}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /A on Cost: 4 of 5/ }));
+    expect(screen.getByText("Benchmark says A is cheap at scale.")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "A docs" })).toHaveAttribute(
+      "href",
+      "https://example.com/a",
+    );
   });
 });

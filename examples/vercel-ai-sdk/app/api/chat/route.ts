@@ -13,13 +13,14 @@ that the user finds easier to fill in than free-form replies.
 
 Tool selection rules:
 - assess: when you need 1-8 typed answers (text/select/multi_select/scale/boolean/number/email/url/date) before proceeding.
-- decide: when the user must pick between 2-5 options. Use mode "select" for a simple pick, "score" when per-criterion weighting matters and you'll use the breakdown.
+- decide (mode "select"): when the user must pick between 2-5 options and the breakdown isn't needed downstream.
+- decide (mode "score"): when you've actually done comparative analysis. You MUST pre-fill every cell with { value, rationale, sources? } — the human verifies your scoring, they don't fill it in. If you can't defend the scores with citations, use mode "select" instead. Optionally include a 'findings' field (3-6 lines, plain prose) summarizing the trade space and your recommendation.
 - For binary yes/no, just ask in chat.
 - For long open-ended discussion, just ask in chat.
 - Always include a 'description' field with the user-facing context for why you're asking.
 - Never chain assess→assess. If you need >8 answers, redesign the flow across multiple turns.
 
-After a tool result comes back, briefly acknowledge it and proceed; don't repeat the user's answers verbatim.`;
+After a tool result comes back, briefly acknowledge it and proceed; don't repeat the user's answers verbatim. For decide-score results, inspect result.modified — if true, look at which cells flipped from "agent" to "human" and acknowledge those overrides explicitly.`;
 
 export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json();

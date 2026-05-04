@@ -1,16 +1,23 @@
 {
   "name": "decide",
-  "description": "Present a decision matrix with options and evaluation criteria. Use when the human needs to weigh tradeoffs between 2-5 options. Cognitive op: decide.",
+  "description": "Present a decision between 2-5 options. Use 'select' mode for a simple pick (option cards). Use 'score' mode when the agent has done analysis and wants the human to verify a per-criterion scoring matrix — pre-fill every cell with a value, rationale, and citations. Cognitive op: decide.",
   "parameters": {
     "type": "object",
     "required": ["title", "options"],
     "properties": {
       "title": { "type": "string", "description": "Short title for the decision" },
-      "description": { "type": "string", "description": "Context for why this decision matters now" },
+      "description": {
+        "type": "string",
+        "description": "1-2 sentence context for why this decision matters now"
+      },
+      "findings": {
+        "type": "string",
+        "description": "Score mode only. A short executive summary (3-6 lines) of the agent's analysis — the conclusion in plain prose. Optional but encouraged."
+      },
       "mode": {
         "enum": ["select", "score"],
         "default": "select",
-        "description": "'select' shows option cards for a single pick. 'score' shows a matrix grid for scoring each option per criterion."
+        "description": "'select' = option cards, human picks one. 'score' = pre-scored matrix, human verifies the agent's analysis (every cell must be pre-filled with value + rationale)."
       },
       "options": {
         "type": "array",
@@ -22,7 +29,41 @@
           "properties": {
             "id": { "type": "string" },
             "label": { "type": "string" },
-            "description": { "type": "string" }
+            "description": {
+              "type": "string",
+              "description": "1-2 sentence option summary."
+            },
+            "scores": {
+              "type": "object",
+              "description": "Score mode only. Required when mode='score'. Map of criterionId → cell. Every criterion must be present.",
+              "additionalProperties": {
+                "type": "object",
+                "required": ["value", "rationale"],
+                "properties": {
+                  "value": {
+                    "type": "number",
+                    "description": "Integer score from 1 to scale_steps (default 5)."
+                  },
+                  "rationale": {
+                    "type": "string",
+                    "description": "1-2 sentence justification for the score. Cite specifics."
+                  },
+                  "sources": {
+                    "type": "array",
+                    "maxItems": 5,
+                    "description": "Optional citations supporting the score.",
+                    "items": {
+                      "type": "object",
+                      "required": ["title"],
+                      "properties": {
+                        "title": { "type": "string" },
+                        "url": { "type": "string", "format": "uri" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       },
@@ -43,7 +84,7 @@
       "scale_steps": {
         "type": "number",
         "default": 5,
-        "description": "Score-mode only. Number of points on the per-cell rating scale."
+        "description": "Score-mode only. Number of points on the per-cell rating scale (1 to scale_steps)."
       }
     }
   }
