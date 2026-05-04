@@ -4,166 +4,261 @@ import { Assess } from "@/components/hitl-ui/assess";
 import { Decide } from "@/components/hitl-ui/decide";
 import { useChat } from "@ai-sdk/react";
 import type { UIMessage } from "ai";
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
+
+const SUGGESTIONS = [
+  {
+    label: "Feature flag setup",
+    prompt: "I want to set up a new feature flag — what do you need to know?",
+    tool: "assess",
+  },
+  {
+    label: "Pick a database",
+    prompt: "Help me pick a database for an events pipeline.",
+    tool: "decide",
+  },
+  {
+    label: "Score databases on cost / speed / ops",
+    prompt:
+      "Score Postgres vs ClickHouse vs DynamoDB across cost, query speed, and ops burden — use the score-mode matrix.",
+    tool: "decide",
+  },
+];
 
 export default function Page() {
-  const { messages, sendMessage, addToolResult, status, error } = useChat();
+  const { messages, sendMessage, addToolResult, status, error, setMessages } = useChat();
   const [input, setInput] = useState("");
+  const [provider, setProvider] = useState<string | null>(null);
+  const tailRef = useRef<HTMLDivElement>(null);
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || status === "streaming" || status === "submitted") return;
-    const text = input;
-    setInput("");
-    await sendMessage({ text });
-  };
+  useEffect(() => {
+    fetch("/api/provider")
+      .then((r) => r.json() as Promise<{ provider: string }>)
+      .then((d) => setProvider(d.provider))
+      .catch(() => setProvider(null));
+  }, []);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: messages/status are scroll triggers, not reads
+  useEffect(() => {
+    tailRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [messages, status]);
 
   const isWorking = status === "streaming" || status === "submitted";
 
+  const send = (text: string) => {
+    if (!text.trim() || isWorking) return;
+    setInput("");
+    sendMessage({ text });
+  };
+
   return (
-    <main className="mx-auto flex min-h-screen max-w-3xl flex-col px-6 py-10">
-      <header className="mb-6 space-y-1">
-        <p className="text-xs uppercase tracking-widest text-zinc-500">hitl-ui · live demo</p>
-        <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
-          Agent → tool call → component → result
-        </h1>
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          A real LLM agent (Vercel AI SDK v6) drives this chat. Try prompts like{" "}
-          <em className="font-mono not-italic">
-            "I want to ship a new feature flag — what do you need from me?"
-          </em>{" "}
-          or <em className="font-mono not-italic">"help me pick a database"</em>. The agent will
-          invoke the <code className="rounded bg-zinc-100 px-1 dark:bg-zinc-900">assess</code> or{" "}
-          <code className="rounded bg-zinc-100 px-1 dark:bg-zinc-900">decide</code> tool; the
-          rendered hitl-ui component lives inline in this conversation.
-        </p>
-      </header>
+    <div className="flex min-h-screen flex-col">
+      <Header
+        onClear={messages.length > 0 ? () => setMessages([]) : undefined}
+        provider={provider}
+      />
 
-      <section className="flex flex-col gap-4 pb-32" aria-live="polite">
-        {messages.length === 0 ? <EmptyState /> : null}
-        {messages.map((m) => (
-          <Message key={m.id} message={m} addToolResult={addToolResult} />
-        ))}
-        {isWorking ? <p className="text-sm italic text-zinc-500">Agent is thinking…</p> : null}
-        {error ? (
-          <div className="rounded-md border border-red-300 bg-red-50 p-3 text-sm text-red-900 dark:border-red-900 dark:bg-red-950 dark:text-red-200">
-            <p className="font-medium">Agent error</p>
-            <p className="mt-1 font-mono text-xs">{error.message}</p>
-          </div>
-        ) : null}
-      </section>
+      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-8 px-6 pb-40 pt-10">
+        {messages.length === 0 ? (
+          <EmptyState onSelect={send} />
+        ) : (
+          messages.map((m) => <MessageRow key={m.id} message={m} addToolResult={addToolResult} />)
+        )}
 
-      <form
-        onSubmit={handleSubmit}
-        className="fixed inset-x-0 bottom-0 border-t border-zinc-200 bg-white/90 px-6 py-4 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/90"
-      >
-        <div className="mx-auto flex max-w-3xl gap-2">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask the agent…"
-            disabled={isWorking}
-            className="flex-1 rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500 disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:placeholder:text-zinc-500"
-          />
-          <button
-            type="submit"
-            disabled={isWorking || !input.trim()}
-            className="rounded-md bg-zinc-950 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-zinc-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200"
-          >
-            Send
-          </button>
-        </div>
-      </form>
-    </main>
-  );
-}
+        {isWorking ? <ThinkingRow /> : null}
+        {error ? <ErrorRow message={error.message} /> : null}
 
-function EmptyState() {
-  return (
-    <div className="rounded-xl border border-dashed border-zinc-300 bg-white p-6 text-center text-sm text-zinc-600 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-400">
-      <p className="mb-3 font-medium text-zinc-900 dark:text-zinc-100">Try one of these prompts:</p>
-      <ul className="space-y-1 font-mono text-xs">
-        <li>"I want to set up a new feature flag — what do you need to know?"</li>
-        <li>"Help me pick a database for an events pipeline."</li>
-        <li>"Score Postgres vs ClickHouse vs DynamoDB for our analytics workload."</li>
-      </ul>
+        <div ref={tailRef} aria-hidden="true" />
+      </main>
+
+      <Composer
+        value={input}
+        onChange={setInput}
+        onSubmit={(e: FormEvent) => {
+          e.preventDefault();
+          send(input);
+        }}
+        disabled={isWorking}
+      />
     </div>
   );
 }
 
-interface MessageProps {
+/* ============================================================================
+ * Header
+ * ========================================================================== */
+
+function Header({ onClear, provider }: { onClear?: () => void; provider: string | null }) {
+  return (
+    <header className="sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-6 py-3">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="inline-flex items-center rounded-md border border-border bg-card px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+            hitl-ui
+          </span>
+          <span className="truncate text-sm font-medium text-foreground">Live agent demo</span>
+        </div>
+        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+          {provider ? (
+            <span
+              title="Active LLM provider · configured via env"
+              className="hidden truncate font-mono sm:inline"
+            >
+              {provider}
+            </span>
+          ) : null}
+          {onClear ? (
+            <button
+              type="button"
+              onClick={onClear}
+              className="rounded-md border border-border bg-card px-2 py-1 transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              Clear
+            </button>
+          ) : null}
+        </div>
+      </div>
+    </header>
+  );
+}
+
+/* ============================================================================
+ * Empty state — clickable suggestion cards
+ * ========================================================================== */
+
+function EmptyState({ onSelect }: { onSelect: (prompt: string) => void }) {
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="space-y-3">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+          What can I help you with?
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          A real LLM agent runs in this chat. When it needs structured input, it calls the{" "}
+          <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">assess</code> or{" "}
+          <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">decide</code> tool — and
+          the matching <span className="font-mono text-xs">hitl-ui</span> component renders inline
+          below.
+        </p>
+      </div>
+
+      <div className="grid gap-2 sm:grid-cols-3">
+        {SUGGESTIONS.map((s) => (
+          <button
+            key={s.label}
+            type="button"
+            onClick={() => onSelect(s.prompt)}
+            className="group flex h-full flex-col gap-2 rounded-lg border border-border bg-card p-4 text-left transition-all hover:border-foreground/30 hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-sm font-medium text-card-foreground">{s.label}</span>
+              <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground transition-colors group-hover:text-foreground">
+                {s.tool}
+              </span>
+            </div>
+            <span className="text-xs leading-relaxed text-muted-foreground">{s.prompt}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================================
+ * Message — assistant or user, with text + tool parts
+ * ========================================================================== */
+
+interface MessageRowProps {
   message: UIMessage;
   addToolResult: (params: { tool: string; toolCallId: string; output: unknown }) => void;
 }
 
-function Message({ message, addToolResult }: MessageProps) {
+function MessageRow({ message, addToolResult }: MessageRowProps) {
   const isUser = message.role === "user";
   return (
-    <div className={isUser ? "flex justify-end" : "flex flex-col gap-2"}>
-      {message.parts.map((part, i) => {
-        // Plain text
-        if (part.type === "text") {
-          return (
-            <div
-              key={`${message.id}-${i}`}
-              className={
-                isUser
-                  ? "max-w-[80%] rounded-2xl rounded-tr-sm bg-zinc-950 px-4 py-2 text-sm text-white dark:bg-zinc-50 dark:text-zinc-950"
-                  : "max-w-[90%] rounded-2xl rounded-tl-sm bg-zinc-100 px-4 py-2 text-sm text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100"
-              }
-            >
-              {part.text}
-            </div>
-          );
-        }
+    <article className="flex flex-col gap-2.5">
+      <RoleLabel sender={isUser ? "you" : "agent"} />
+      <div className="flex flex-col gap-3">
+        {message.parts.map((part, i) => {
+          if (part.type === "text") {
+            return (
+              <p
+                key={`${message.id}-${i}`}
+                className="text-sm leading-relaxed text-foreground whitespace-pre-wrap"
+              >
+                {part.text}
+              </p>
+            );
+          }
 
-        // Tool invocations — typed-tool variants have type "tool-<name>"
-        if (part.type === "tool-assess") {
-          return (
-            <ToolFrame key={part.toolCallId} state={part.state} name="assess">
-              {part.state === "input-available" ? (
-                <Assess
-                  // biome-ignore lint/suspicious/noExplicitAny: agent-supplied input matches AssessParams via Zod schema
-                  {...(part.input as any)}
-                  onSubmit={(result) =>
-                    addToolResult({
-                      tool: "assess",
-                      toolCallId: part.toolCallId,
-                      output: result,
-                    })
-                  }
-                />
-              ) : null}
-            </ToolFrame>
-          );
-        }
+          if (part.type === "tool-assess") {
+            return (
+              <ToolFrame key={part.toolCallId} state={part.state} name="assess">
+                {part.state === "input-available" ? (
+                  <Assess
+                    // biome-ignore lint/suspicious/noExplicitAny: agent-supplied input matches AssessParams via Zod schema
+                    {...(part.input as any)}
+                    onSubmit={(result) =>
+                      addToolResult({
+                        tool: "assess",
+                        toolCallId: part.toolCallId,
+                        output: result,
+                      })
+                    }
+                  />
+                ) : null}
+              </ToolFrame>
+            );
+          }
 
-        if (part.type === "tool-decide") {
-          return (
-            <ToolFrame key={part.toolCallId} state={part.state} name="decide">
-              {part.state === "input-available" ? (
-                <Decide
-                  // biome-ignore lint/suspicious/noExplicitAny: agent-supplied input matches DecideParams via Zod schema
-                  {...(part.input as any)}
-                  onSubmit={(result) =>
-                    addToolResult({
-                      tool: "decide",
-                      toolCallId: part.toolCallId,
-                      output: result,
-                    })
-                  }
-                />
-              ) : null}
-            </ToolFrame>
-          );
-        }
+          if (part.type === "tool-decide") {
+            return (
+              <ToolFrame key={part.toolCallId} state={part.state} name="decide">
+                {part.state === "input-available" ? (
+                  <Decide
+                    // biome-ignore lint/suspicious/noExplicitAny: agent-supplied input matches DecideParams via Zod schema
+                    {...(part.input as any)}
+                    onSubmit={(result) =>
+                      addToolResult({
+                        tool: "decide",
+                        toolCallId: part.toolCallId,
+                        output: result,
+                      })
+                    }
+                  />
+                ) : null}
+              </ToolFrame>
+            );
+          }
 
-        return null;
-      })}
+          return null;
+        })}
+      </div>
+    </article>
+  );
+}
+
+function RoleLabel({ sender }: { sender: "you" | "agent" }) {
+  return (
+    <div className="flex items-center gap-1.5">
+      <span
+        aria-hidden="true"
+        className={
+          sender === "agent"
+            ? "size-1.5 rounded-full bg-primary"
+            : "size-1.5 rounded-full bg-muted-foreground/60"
+        }
+      />
+      <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+        {sender}
+      </span>
     </div>
   );
 }
+
+/* ============================================================================
+ * Tool frame — labels the agent's tool call and wraps the rendered component
+ * ========================================================================== */
 
 function ToolFrame({
   name,
@@ -176,22 +271,143 @@ function ToolFrame({
 }) {
   if (state === "input-streaming") {
     return (
-      <p className="text-xs italic text-zinc-500">
-        Agent is preparing the <code>{name}</code> tool…
-      </p>
+      <ToolStatus name={name}>
+        <span className="italic">preparing…</span>
+      </ToolStatus>
     );
   }
-  if (state === "input-available") return <>{children}</>;
-  if (state === "output-available") {
+
+  if (state === "input-available") {
     return (
-      <p className="text-xs text-zinc-500">
-        ✓ <code>{name}</code> submitted
-      </p>
+      <div className="space-y-2">
+        <ToolStatus name={name} status="ready" />
+        {children}
+      </div>
     );
   }
-  if (state === "output-error" || state === "output-denied") {
-    return <p className="text-xs text-red-600">✗ {name} errored</p>;
+
+  if (state === "output-available") {
+    return <ToolStatus name={name} status="submitted" />;
   }
-  // Approval states + unknown — render nothing so the chat keeps flowing.
+
+  if (state === "output-error" || state === "output-denied") {
+    return <ToolStatus name={name} status="error" />;
+  }
+
   return null;
+}
+
+function ToolStatus({
+  name,
+  status = "active",
+  children,
+}: {
+  name: string;
+  status?: "active" | "ready" | "submitted" | "error";
+  children?: React.ReactNode;
+}) {
+  const dot =
+    status === "submitted"
+      ? "bg-primary"
+      : status === "error"
+        ? "bg-destructive"
+        : "bg-muted-foreground/60 animate-pulse";
+
+  const label =
+    status === "submitted"
+      ? "submitted"
+      : status === "error"
+        ? "errored"
+        : status === "ready"
+          ? "awaiting input"
+          : "active";
+
+  return (
+    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+      <span aria-hidden="true" className={`size-1.5 rounded-full ${dot}`} />
+      <span className="inline-flex items-center rounded border border-border bg-card px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wider">
+        tool · {name}
+      </span>
+      <span>{label}</span>
+      {children}
+    </div>
+  );
+}
+
+/* ============================================================================
+ * Thinking + error rows
+ * ========================================================================== */
+
+function ThinkingRow() {
+  return (
+    <div className="flex flex-col gap-2.5">
+      <RoleLabel sender="agent" />
+      <div className="flex h-5 items-center gap-1">
+        <span className="size-1.5 animate-bounce rounded-full bg-muted-foreground/70 [animation-delay:-0.3s]" />
+        <span className="size-1.5 animate-bounce rounded-full bg-muted-foreground/70 [animation-delay:-0.15s]" />
+        <span className="size-1.5 animate-bounce rounded-full bg-muted-foreground/70" />
+      </div>
+    </div>
+  );
+}
+
+function ErrorRow({ message }: { message: string }) {
+  return (
+    <div className="flex items-start gap-3 rounded-lg border border-destructive/50 bg-destructive/5 p-3">
+      <span
+        aria-hidden="true"
+        className="mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-destructive/15 font-mono text-xs font-bold text-destructive"
+      >
+        !
+      </span>
+      <div className="flex-1 space-y-1">
+        <p className="text-sm font-medium text-foreground">Agent error</p>
+        <p className="font-mono text-xs leading-relaxed text-muted-foreground">{message}</p>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================================
+ * Composer
+ * ========================================================================== */
+
+function Composer({
+  value,
+  onChange,
+  onSubmit,
+  disabled,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  onSubmit: (e: FormEvent) => void;
+  disabled: boolean;
+}) {
+  const canSend = !disabled && value.trim().length > 0;
+  return (
+    <form
+      onSubmit={onSubmit}
+      className="fixed inset-x-0 bottom-0 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/70"
+    >
+      <div className="mx-auto flex max-w-3xl items-end gap-2 px-6 py-4">
+        <div className="relative flex-1">
+          <input
+            type="text"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder="Ask the agent…"
+            disabled={disabled}
+            className="w-full rounded-md border border-border bg-card px-3 py-2.5 text-sm text-foreground shadow-sm placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/30 disabled:opacity-50"
+          />
+        </div>
+        <button
+          type="submit"
+          disabled={!canSend}
+          className="rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          Send
+        </button>
+      </div>
+    </form>
+  );
 }
