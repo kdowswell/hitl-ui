@@ -39,7 +39,7 @@ The catalog is organized by the **cognitive operation** the human is performing 
 | Component       | Cognitive op  | Status   | Description |
 |---|---|---|---|
 | `assess`        | Provide info  | Shipped  | Multi-question structured form, heterogeneous field types |
-| `decide`        | Decide        | Planned  | Pick + weigh options across criteria |
+| `decide`        | Decide        | Shipped  | Pick + weigh options across criteria (`select` and `score` modes) |
 | `rank`          | Order         | Planned  | Drag-and-drop priority sequencing |
 | `approve`       | Gate          | Planned  | Yes/no on a proposed action with optional rationale |
 | `annotate`      | Annotate      | Planned  | Edit / mark up content the agent produced |

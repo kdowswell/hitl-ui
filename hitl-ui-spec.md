@@ -23,7 +23,7 @@ The catalog is organized by **the cognitive operation the human is performing**,
 | Component | Cognitive op | Status | Description |
 |---|---|---|---|
 | `assess`        | Provide info | **Shipped** | Multi-question structured form. Heterogeneous field types. |
-| `decide`        | Decide       | Planned   | Pick + weigh options across criteria. |
+| `decide`        | Decide       | **Shipped** | Pick + weigh options across criteria. |
 | `rank`          | Order        | Planned   | Drag-and-drop priority sequencing. |
 | `approve`       | Gate         | Planned   | Yes/no on a proposed action with optional rationale. |
 | `annotate`      | Annotate     | Planned   | Edit / mark up content the agent produced. |
@@ -163,7 +163,7 @@ Type-only import — the package doesn't have to be installed at runtime for `ad
 
 ---
 
-### 2. `decide` — Pick + weigh options *(Planned)*
+### 2. `decide` — Pick + weigh options *(Shipped)*
 
 **Cognitive op:** Decide
 
@@ -447,7 +447,7 @@ agent-ui/                          # repo dir kept for git-history continuity
 ### Phase 2 — Catalog completion
 
 - [ ] Extend `assess` to cover all merged field types (textarea, number, email, url, date, validation)
-- [ ] Ship `decide`
+- [x] Ship `decide`
 - [ ] Ship `rank`
 - [ ] Ship `approve` (narrowed scope)
 - [ ] Ship `annotate`

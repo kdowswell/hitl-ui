@@ -190,7 +190,13 @@ export const OptionalOnly: Story = {
       "All questions are optional. Submit is enabled from the start; users can skip everything.",
     questions: [
       { id: "feedback", type: "textarea", prompt: "Any feedback?", required: false },
-      { id: "rating", type: "scale", prompt: "Rate this experience", scale_steps: 5, required: false },
+      {
+        id: "rating",
+        type: "scale",
+        prompt: "Rate this experience",
+        scale_steps: 5,
+        required: false,
+      },
       { id: "follow_up", type: "boolean", prompt: "OK to follow up?" },
     ],
   },

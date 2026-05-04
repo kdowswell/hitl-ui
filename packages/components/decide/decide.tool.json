@@ -1,0 +1,50 @@
+{
+  "name": "decide",
+  "description": "Present a decision matrix with options and evaluation criteria. Use when the human needs to weigh tradeoffs between 2-5 options. Cognitive op: decide.",
+  "parameters": {
+    "type": "object",
+    "required": ["title", "options"],
+    "properties": {
+      "title": { "type": "string", "description": "Short title for the decision" },
+      "description": { "type": "string", "description": "Context for why this decision matters now" },
+      "mode": {
+        "enum": ["select", "score"],
+        "default": "select",
+        "description": "'select' shows option cards for a single pick. 'score' shows a matrix grid for scoring each option per criterion."
+      },
+      "options": {
+        "type": "array",
+        "minItems": 2,
+        "maxItems": 5,
+        "items": {
+          "type": "object",
+          "required": ["id", "label"],
+          "properties": {
+            "id": { "type": "string" },
+            "label": { "type": "string" },
+            "description": { "type": "string" }
+          }
+        }
+      },
+      "criteria": {
+        "type": "array",
+        "maxItems": 6,
+        "description": "Required when mode is 'score'; optional context bullets when mode is 'select'.",
+        "items": {
+          "type": "object",
+          "required": ["id", "label"],
+          "properties": {
+            "id": { "type": "string" },
+            "label": { "type": "string" },
+            "weight": { "type": "number", "default": 1 }
+          }
+        }
+      },
+      "scale_steps": {
+        "type": "number",
+        "default": 5,
+        "description": "Score-mode only. Number of points on the per-cell rating scale."
+      }
+    }
+  }
+}

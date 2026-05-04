@@ -1,0 +1,21 @@
+{
+  "name": "decide",
+  "description": "Decision matrix — pick from 2-5 options, optionally with per-criterion scoring.",
+  "peers": {
+    "react": ">=19",
+    "react-dom": ">=19",
+    "clsx": "^2.1.1",
+    "zod": "^3.23.8"
+  },
+  "files": [
+    { "target": "components", "path": "decide/decide.tsx", "source": "decide.tsx" },
+    { "target": "components", "path": "decide/decide.types.ts", "source": "decide.types.ts" },
+    { "target": "components", "path": "decide/index.ts", "source": "index.ts" },
+    { "target": "tools", "path": "decide.tool.json", "source": "decide.tool.json" },
+    {
+      "target": "instructions",
+      "path": "decide.instructions.md",
+      "source": "decide.instructions.md"
+    }
+  ]
+}
