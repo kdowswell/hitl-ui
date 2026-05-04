@@ -72,6 +72,9 @@ importers:
 
   examples/vercel-ai-sdk:
     dependencies:
+      '@ai-sdk/gateway':
+        specifier: ^3.0.109
+        version: 3.0.109(zod@3.25.76)
       '@ai-sdk/openai':
         specifier: ^3.0.58
         version: 3.0.58(zod@3.25.76)

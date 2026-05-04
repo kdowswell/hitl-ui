@@ -16,6 +16,7 @@
     "clean": "rm -rf .next node_modules components/hitl-ui tools/hitl-ui instructions/hitl-ui"
   },
   "dependencies": {
+    "@ai-sdk/gateway": "^3.0.109",
     "@ai-sdk/openai": "^3.0.58",
     "@ai-sdk/react": "^3.0.0",
     "@radix-ui/react-checkbox": "^1.1.3",
